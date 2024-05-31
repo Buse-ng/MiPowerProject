@@ -29,7 +29,7 @@
   <body>
     <div class="container">
       <h1>Prediction Result</h1>
-      <p>The predicted potability is: {{ prediction }}</p>
+      <p>The predicted potability is: {{ prediction }} {% if prediction == 0 %}(içilemez){% else %}(içilebilir){% endif %} </p>
     </div>
   </body>
 </html>
