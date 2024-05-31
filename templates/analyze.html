@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      body {
+        background-color: #1e1e2e;
+        color: #f8f8ff;
+      }
+      .plot {
+        background-color: #1e1e2e;
+        color: #f8f8ff;
+      }
+      .plotly-graph-div {
+        background-color: transparent;
+        color: #f8f8ff;
+      }
+      .plotly {
+        background-color: transparent !important;
+      }
+      table {
+        width: 70%;
+        border-collapse: collapse;
+        margin: 0 auto;
+      }
+      th,
+      td {
+        border: 1px solid rgba(0, 0, 0, 0.3);
+        padding: 12px;
+      }
+      th {
+        background-color: #00bfff;
+        color: #f8f8ff;
+      }
+      tr:nth-child(even) {
+        background-color: #1e1e2e;
+      }
+      tr:hover {
+        background-color: #1e1e2e;
+      }
+      .predict-button {
+        background-color: #4caf50; /* Yeşil */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 8px;
+      }
+
+      .predict-button:hover {
+        background-color: #45a049; /* Koyu Yeşil */
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1 style="color: #00bfff; font-size: 50px; text-align: center">
+      Data Analysis for {{ filename }}
+    </h1>
+
+    <h1 style="color: #00bfff; text-align: center">Shape:</h1>
+    <p style="text-align: center">{{ data_shape }}</p>
+
+    <h1 style="color: #00bfff; text-align: center">Numerical Columns:</h1>
+    <ul
+      style="
+        text-align: center;
+        list-style-position: inside;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      "
+    >
+      {% for col in num_columns %}
+      <li style="text-align: left; margin: 0 10px">{{ col }}</li>
+      {% endfor %}
+    </ul>
+
+    <h1 style="color: #00bfff; text-align: center">Categorical Columns:</h1>
+    <ul
+      style="
+        text-align: center;
+        list-style-position: inside;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      "
+    >
+      {% for col in cat_columns %}
+      <li style="text-align: left; margin: 0 10px">{{ col }}</li>
+      {% endfor %}
+    </ul>
+
+    <h1 style="color: #00bfff; text-align: center">Head</h1>
+    <div style="overflow-x: auto; margin: 0 auto; width: 80%">
+      <table border="1" style="margin: 0 auto; width: 100%">
+        <thead>
+          <tr>
+            {% for col in data.columns %}
+            <th>{{ col }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for index, row in data.head().iterrows() %}
+          <tr>
+            {% for col, val in row.items() %}
+            <td>{{ val }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h1 style="color: #00bfff; text-align: center">Summary:</h1>
+    <div style="margin: 0 auto; width: fit-content">{{ tables[0] | safe }}</div>
+
+    <h1 style="color: #00bfff; text-align: center">Types:</h1>
+    <table border="1" style="margin: 0 auto">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Data Types</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for col, dtype in data.dtypes.items() %}
+        <tr>
+          <td>{{ col }}</td>
+          <td>{{ dtype }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h1 style="color: #00bfff; text-align: center">Missing Values:</h1>
+    <table border="1" style="margin: 0 auto">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Missing Values</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for col in data.columns %}
+        <tr>
+          <td>{{ col }}</td>
+          <td>{{ data[col].isnull().sum() }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h1 style="color: #00bfff; text-align: center">Box Plot:</h1>
+    <div class="plot">{{ plot_div_box_plot|safe }}</div>
+
+    <h1 style="color: #00bfff; text-align: center">Histograms:</h1>
+    {% for plot_div in plot_div_histograms %}
+    <div class="plot">{{ plot_div|safe }}</div>
+    {% endfor %}
+
+    <h1 style="color: #00bfff; text-align: center">Violin Plots:</h1>
+    {% for plot_div in plot_div_violin_plots %}
+    <div class="plot">{{ plot_div|safe }}</div>
+    {% endfor %}
+
+    <h1 style="color: #00bfff; text-align: center">Categorical Analysis:</h1>
+    {% for col, plot_data in cat_plots.items() %}
+    <div style="margin: 0 auto; width: fit-content">
+      <div class="plot" id="{{ col }}-chart"></div>
+    </div>
+
+    <h1 style="color: #00bfff; font-size: 50px; text-align: center">
+      Preprocessing Data for {{ filename }}
+    </h1>
+
+    <h1 style="color: #00bfff; text-align: center">
+      Columns with Missing Values:
+    </h1>
+    <ul
+      style="
+        text-align: center;
+        list-style-position: inside;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      "
+    >
+      {% for col in request_list %}
+      <li style="text-align: left; margin: 0 10px">{{ col }}</li>
+      {% endfor %}
+    </ul>
+
+    <h1 style="color: #00bfff; text-align: center">Groups and Fill Values:</h1>
+    {% for fill_values in request_list %}
+    <h2 style="color: #00bfff; text-align: center">Potability: {{ loop.index0 }}</h2>
+    <table border="1" style="margin: 0 auto">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Fill Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for col, val in fill_values.items() %}
+        <tr>
+          <td>{{ col }}</td>
+          <td>{{ val }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endfor %}
+
+    <h1 style="color: #00bfff; text-align: center">
+      Data Head After Preprocessing:
+    </h1>
+    <div style="overflow-x: auto; margin: 0 auto; width: 80%">
+      <table border="1" style="margin: 0 auto">
+        <thead>
+          <tr>
+            {% for col in data_clean.columns %}
+            <th>{{ col }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for index, row in data_clean.head().iterrows() %}
+          <tr>
+            {% for col, val in row.items() %}
+            <td>{{ val }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <h1 style="color: #00bfff; text-align: center">
+      Missing Values After Preprocessing:
+    </h1>
+    <table border="1" style="margin: 0 auto">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>Missing Values</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for col in data_clean.columns %}
+        <tr>
+          <td>{{ col }}</td>
+          <td>{{ data_clean[col].isnull().sum() }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h1 style="color: #00bfff; text-align: center">
+      Number of Outliers in Each Column
+    </h1>
+    <table border="1">
+      <tr>
+        <th>Column</th>
+        <th>Number of Outliers</th>
+      </tr>
+      {% for col, count in outlier_counts.items() %}
+      <tr>
+        <td>{{ col }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <form action="{{ url_for('predict') }}" method="get">
+      <input type="hidden" name="filename" value="{{ filename }}" />
+      <button class="predict-button" type="submit">Predict</button>
+    </form>
+
+    <script>
+      Plotly.newPlot('{{ col }}-chart', {{ plot_data.data | safe }}, {{plot_data.layout | safe }});
+    </script>
+    {% endfor %}
+  </body>
+</html>

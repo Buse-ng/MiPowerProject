@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <style>
+      body {
+        background-color: #1e1e2e;
+        color: #f8f8ff;
+        font-family: Arial, sans-serif;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #252637;
+        border-radius: 8px;
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      p {
+        font-size: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Prediction Result</h1>
+      <p>The predicted potability is: {{ prediction }}</p>
+    </div>
+  </body>
+</html>
