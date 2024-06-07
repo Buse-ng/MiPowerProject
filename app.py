@@ -59,22 +59,25 @@ def create_histograms_and_violin_plots(data, num_columns):
 
 
 def preprocessing(data):
-    columns_to_fill = data.columns[data.isnull().any()].tolist()
-    groups = data['Potability'].unique()
+    data_clean = data.dropna(subset=['ph', 'Sulfate'])
+    
+    columns_to_fill = ['Trihalomethanes']
+    groups = data_clean['Potability'].unique()
     request_list = [] 
     for group in groups:
-        group_data = data[data['Potability'] == group]
+        group_data = data_clean[data_clean['Potability'] == group]
     
         fill_values = {col: group_data[col].mean() for col in columns_to_fill}
         request_list.append(fill_values)
-        data.loc[data['Potability'] == group, columns_to_fill] = group_data[columns_to_fill].fillna(value=fill_values)
-    return data, request_list
+        data_clean.loc[data_clean['Potability'] == group, columns_to_fill] = group_data[columns_to_fill].fillna(value=fill_values)
+    return data_clean, request_list
+
 
 def anomaly(data):
     req_dict= {}
     for col in data.columns:
-        Q3 = np.quantile(data[col], 0.75)
-        Q1 = np.quantile(data[col], 0.25)
+        Q3 = np.quantile(data[col], 0.95)
+        Q1 = np.quantile(data[col], 0.05)
         IQR = Q3 - Q1
         
         lower_bound = Q1 - 1.5 * IQR
@@ -82,9 +85,49 @@ def anomaly(data):
         
         outliers = data[(data[col] > upper_bound) | (data[col] < lower_bound)]
         req_dict[col] = outliers.shape[0]
+        # Aykırı değerleri baskılama (clip)
+        data[col] = np.where(data[col] > upper_bound, upper_bound, data[col])
+        data[col] = np.where(data[col] < lower_bound, lower_bound, data[col])
     return req_dict
 
 
+def auto_select_target_column(data):
+    numerical_columns = data.select_dtypes(include=['number']).columns
+    min_variance = float('inf')
+    target_column = None
+    
+    for column in numerical_columns:
+        variance = data[column].var()
+        if variance < min_variance:
+            min_variance = variance
+            target_column = column
+    
+    return target_column
+  
+"""
+def anomaly(data):
+    cleaned_data = data.copy()  # Veri kümesinin kopyasını oluştur
+    removed_rows = {}  # Silinen satır sayısını saklamak için bir sözlük
+
+    for col in cleaned_data.columns:
+        Q3 = np.quantile(cleaned_data[col], 0.95)
+        Q1 = np.quantile(cleaned_data[col], 0.05)
+        IQR = Q3 - Q1
+        
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        
+        # Aykırı değerlere sahip satırları bul
+        outliers = cleaned_data[(cleaned_data[col] < lower_bound) | (cleaned_data[col] > upper_bound)]
+        
+        # Aykırı değerlere sahip satırları kaldır
+        cleaned_data = cleaned_data.drop(outliers.index)
+        
+        # Silinen satır sayısını kaydet
+        removed_rows[col] = outliers.shape[0]
+    
+    return removed_rows
+"""
 
 @app.route('/')
 def index():
@@ -115,6 +158,8 @@ def upload_file():
 def analyze(filename):
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     data = pd.read_csv(filepath)
+
+    target_column = auto_select_target_column(data)
 
     summary = data.describe().to_html()
 
@@ -201,9 +246,8 @@ def analyze(filename):
     
         cat_plots[col] = {'data': data1, 'layout': layout}
 
-
     data_clean, req_list = preprocessing(data)
-    anomaly_dict = anomaly(data) 
+    anomaly_dict = anomaly(data_clean) 
     
     
     
@@ -220,7 +264,8 @@ def analyze(filename):
                            request_list= req_list,
                            data_clean=data_clean,
                            outlier_counts=anomaly_dict,
-                           data=data)
+                           data=data,
+                           target_column=target_column)
 
 
 @app.route('/predict', methods=['GET', 'POST'])
@@ -252,3 +297,4 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
