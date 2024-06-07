@@ -59,16 +59,19 @@ def create_histograms_and_violin_plots(data, num_columns):
 
 
 def preprocessing(data):
-    columns_to_fill = data.columns[data.isnull().any()].tolist()
-    groups = data['Potability'].unique()
+    data_clean = data.dropna(subset=['ph', 'Sulfate'])
+    
+    columns_to_fill = ['Trihalomethanes']
+    groups = data_clean['Potability'].unique()
     request_list = [] 
     for group in groups:
-        group_data = data[data['Potability'] == group]
+        group_data = data_clean[data_clean['Potability'] == group]
     
         fill_values = {col: group_data[col].mean() for col in columns_to_fill}
         request_list.append(fill_values)
-        data.loc[data['Potability'] == group, columns_to_fill] = group_data[columns_to_fill].fillna(value=fill_values)
-    return data, request_list
+        data_clean.loc[data_clean['Potability'] == group, columns_to_fill] = group_data[columns_to_fill].fillna(value=fill_values)
+    return data_clean, request_list
+
 
 def anomaly(data):
     req_dict= {}
@@ -84,7 +87,18 @@ def anomaly(data):
         req_dict[col] = outliers.shape[0]
     return req_dict
 
-
+def auto_select_target_column(data):
+    numerical_columns = data.select_dtypes(include=['number']).columns
+    min_variance = float('inf')
+    target_column = None
+    
+    for column in numerical_columns:
+        variance = data[column].var()
+        if variance < min_variance:
+            min_variance = variance
+            target_column = column
+    
+    return target_column
 
 @app.route('/')
 def index():
@@ -115,6 +129,8 @@ def upload_file():
 def analyze(filename):
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     data = pd.read_csv(filepath)
+
+    target_column = auto_select_target_column(data)
 
     summary = data.describe().to_html()
 
@@ -201,9 +217,8 @@ def analyze(filename):
     
         cat_plots[col] = {'data': data1, 'layout': layout}
 
-
     data_clean, req_list = preprocessing(data)
-    anomaly_dict = anomaly(data) 
+    anomaly_dict = anomaly(data_clean) 
     
     
     
@@ -220,7 +235,8 @@ def analyze(filename):
                            request_list= req_list,
                            data_clean=data_clean,
                            outlier_counts=anomaly_dict,
-                           data=data)
+                           data=data,
+                           target_column=target_column)
 
 
 @app.route('/predict', methods=['GET', 'POST'])
@@ -252,3 +268,4 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
