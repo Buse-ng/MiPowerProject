@@ -47,6 +47,15 @@ The data analysis steps include:
 - SVC: 63.3% accuracy
 - Random Forest: 77.8% accuracy (best performance)
 
+## Algorithm Performance (After the changes(outliers, missing data, categorization))
+- Logistic Regression: 57.7% 
+- SVC: 57.7% 
+- Random Forest: 69.5% 
+- XGBoost: 66.2%
+- LightGBM: 69.1%
+- CatBoost : 72.6%
+- AdaBoost: 58.0%
+
 ## Prediction
 The web application provides users with the ability to make predictions. The prediction results are presented to the user. When tested with sample inputs from the dataset, the prediction results are accurate. This demonstrates that the model can produce correct results with sample inputs from the dataset.
 
