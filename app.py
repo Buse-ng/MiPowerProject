@@ -281,13 +281,14 @@ def predict():
             'Conductivity': float(form_data['Conductivity']),
             'Organic_carbon': float(form_data['Organic_carbon']),
             'Trihalomethanes': float(form_data['Trihalomethanes']),
-            'Turbidity': float(form_data['Turbidity'])
+            'Turbidity': float(form_data['Turbidity']),
+            'ph_category_Bazik': float(1 if float(form_data['ph']) > 7 else 0)
         }
 
         test_df = pd.DataFrame([test_data])
     
 
-        model_path = os.path.join(app.root_path, 'models/random_forest_model.joblib')
+        model_path = os.path.join(app.root_path, 'models/cat_model.joblib')
         model = joblib.load(model_path)
         
         prediction = model.predict(test_df)
