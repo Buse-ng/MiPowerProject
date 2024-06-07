@@ -42,7 +42,7 @@
         background-color: #1e1e2e;
       }
       .predict-button {
-        background-color: #4caf50; /* Yeşil */
+        background-color: #F33535; 
         border: none;
         color: white;
         padding: 15px 32px;
@@ -56,7 +56,7 @@
       }
 
       .predict-button:hover {
-        background-color: #45a049; /* Koyu Yeşil */
+        background-color: #D71313;
       }
     </style>
   </head>
@@ -315,11 +315,12 @@
       </tr>
       {% endfor %}
     </table>
-
-    <form action="{{ url_for('predict') }}" method="get">
-      <input type="hidden" name="filename" value="{{ filename }}" />
-      <button class="predict-button" type="submit">Predict</button>
-    </form>
+    <div style="display:flex; align-items:center; justify-content:center; margin:10px 0 10px 0;">
+      <form action="{{ url_for('predict') }}" method="get">
+        <input type="hidden" name="filename" value="{{ filename }}" />
+        <button class="predict-button" type="submit">Predict</button>
+      </form>
+    </div>
 
     <script>
       Plotly.newPlot('{{ col }}-chart', {{ plot_data.data | safe }}, {{plot_data.layout | safe }});
