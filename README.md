@@ -1,6 +1,6 @@
-# MiPowerProject
-
 ## Water Quality Analysis
+
+https://github.com/Buse-ng/MiPowerProject/assets/69714956/454732ce-a9be-487b-af52-dd272732ccad
 
 ## Motivation and Background
 The analysis of the impact of water quality on potability holds significant real-world importance. Water is a fundamental resource essential for human health. However, the potability of water depends on its safety and suitability for drinking purposes.
@@ -82,7 +82,5 @@ The data analysis steps include:
 
 ## Prediction
 The web application provides users with the ability to make predictions. The prediction results are presented to the user. When tested with sample inputs from the dataset, the prediction results are accurate. This demonstrates that the model can produce correct results with sample inputs from the dataset.
-
-https://github.com/Buse-ng/MiPowerProject/assets/69714956/454732ce-a9be-487b-af52-dd272732ccad
 
 ![pred](https://github.com/Buse-ng/MiPowerProject/assets/69714956/853c5d5e-a938-4f6b-929f-fe1fcdddf47f)
