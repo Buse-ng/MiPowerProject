@@ -30,6 +30,10 @@ The dataset contains 491 missing values in the pH column, 781 in the sulfate col
 - Logistic Regression
 - Support Vector Machines (SVM Classification)
 - Random Forest
+- AdaBoost
+- XGBoost
+- CatBoost
+- LightGBM
 
 ## Libraries Used
 The libraries used include Flask, Pandas, NumPy, Matplotlib, and Plotly. The code creates a Flask application and performs data analysis tasks.
@@ -45,7 +49,27 @@ The data analysis steps include:
 ## Algorithm Performance
 - Logistic Regression: 63.1% accuracy
 - SVC: 63.3% accuracy
-- Random Forest: 77.8% accuracy (best performance)
+- Random Forest: 76.3% accuracy
+- AdaBoost: 75.9% 
+- XGBoost: 76.9% 
+- CatBoost: 77.7% 
+- LightGBM: 77.8% 
+
+## Train and Test: (overfit)
+- LightGBM Accuracy: 77.8% 
+- LightGBM Train Accuracy: 99.4%
+
+- Random Forest Accuracy: 76.3% 
+- Random Forest Train Accuracy: 100%
+
+- CatBoost Accuracy: 77.7% 
+- CatBoost Train Accuracy: 94.8%
+
+## Parameter Optimization:
+- XGBoost: Best Score: 79.4% 
+- LightGBM: Best Score: 79.5% 
+- CatBoost: Best Score: 80.1%
+- Random Forest: 80.4% 
 
 ## Algorithm Performance (After the changes(outliers, missing data, categorization))
 - Logistic Regression: 57.7% 
